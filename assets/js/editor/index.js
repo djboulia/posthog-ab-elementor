@@ -47,8 +47,8 @@ jQuery(window).on("elementor:init", function () {
   // Listen for when a user opens our widget editor panel
   // disable all reordering and duplication functionality within the
   // repeater control, to prevent users from accidentally breaking
-  // the nested structure of the A/B test items.
-  // We also remove the "Add Item" button to enforce a fixed number of items,
+  // the structure of the A/B test items.
+  // We also remove the "Add Item" button to enforce a fixed number of items
   elementor.hooks.addAction(
     "panel/open_editor/widget/phab-nested-accordion",
     function (panel, model, view) {

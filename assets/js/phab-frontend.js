@@ -10,21 +10,21 @@
  *  4. If PostHog never loads (timeout), reveal the control variant.
  */
 (function () {
-  'use strict';
+  "use strict";
 
   var TIMEOUT_MS = 3000; // fallback reveal after 3 s
-  var revealed   = false;
+  var revealed = false;
 
   /**
    * Hide all A/B containers until we know which variant to show.
    * Uses inline style so it takes effect before any CSS loads.
    */
   function hideContainers() {
-    var els = document.querySelectorAll('[data-phab-flag]');
+    var els = document.querySelectorAll("[data-phab-flag]");
     els.forEach(function (el) {
-      el.style.visibility = 'hidden';
-      el.style.height     = '0';
-      el.style.overflow   = 'hidden';
+      el.style.visibility = "hidden";
+      el.style.height = "0";
+      el.style.overflow = "hidden";
     });
   }
 
@@ -38,29 +38,41 @@
 
     // Group elements by flag key.
     var groups = {};
-    var els = document.querySelectorAll('[data-phab-flag]');
+    var els = document.querySelectorAll("[data-phab-flag]");
     els.forEach(function (el) {
-      var flag = el.getAttribute('data-phab-flag');
+      var flag = el.getAttribute("data-phab-flag");
       if (!groups[flag]) groups[flag] = [];
       groups[flag].push(el);
     });
 
+    console.log(
+      "phab: Applying feature flag variants for flags:",
+      Object.keys(groups),
+    );
+
     Object.keys(groups).forEach(function (flag) {
-      var flagValue = (window.posthog && window.posthog.getFeatureFlag)
-        ? window.posthog.getFeatureFlag(flag)
-        : null;
+      var flagValue =
+        window.posthog && window.posthog.getFeatureFlag
+          ? window.posthog.getFeatureFlag(flag)
+          : null;
+
+      console.log(
+        `phab: Flag "${flag}" has value:`,
+        flagValue,
+        "(null/undefined/false treated as 'control')",
+      );
 
       // Normalise: false / undefined / null → 'control'
-      if (!flagValue || flagValue === false) flagValue = 'control';
+      if (!flagValue || flagValue === false) flagValue = "control";
 
       groups[flag].forEach(function (el) {
-        var variant = el.getAttribute('data-phab-variant') || 'control';
+        var variant = el.getAttribute("data-phab-variant") || "control";
         if (variant === flagValue) {
-          el.style.visibility = '';
-          el.style.height     = '';
-          el.style.overflow   = '';
+          el.style.visibility = "";
+          el.style.height = "";
+          el.style.overflow = "";
         } else {
-          el.style.display = 'none';
+          el.style.display = "none";
         }
       });
     });
@@ -71,7 +83,7 @@
     applyVariants();
   }, TIMEOUT_MS);
 
-  document.addEventListener('DOMContentLoaded', function () {
+  document.addEventListener("DOMContentLoaded", function () {
     hideContainers();
 
     if (window.posthog && window.posthog.onFeatureFlags) {
@@ -85,5 +97,4 @@
       applyVariants();
     }
   });
-
 })();

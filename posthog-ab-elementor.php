@@ -87,7 +87,6 @@ function phab_register_widgets($widgets_manager)
 }
 
 add_action('elementor/editor/before_enqueue_scripts', function () {
-
 	wp_enqueue_script(
 		'phab-nested-accordion',
 		PHAB_URL . 'assets/js/editor/index.js',
@@ -120,14 +119,6 @@ function phab_enqueue_widget_assets()
 		[],
 		PHAB_VERSION
 	);
-
-	// wp_register_script(
-	// 	'phab-nested-accordion',
-	// 	PHAB_URL . 'assets/js/editor/index.js',
-	// 	[],
-	// 	PHAB_VERSION,
-	// 	false
-	// );
 
 	wp_register_script(
 		'phab-nested-accordion-frontend',

@@ -473,7 +473,6 @@ window.addEventListener("elementor/frontend/init", () => {
         accordionContent = accordionItem.querySelector(
           settings.selectors.accordionContent,
         ),
-        { max_items_expended: maxItemsExpended } = this.getElementSettings(),
         directAccordionItems = accordion.querySelectorAll(
           settings.selectors.directAccordionItems,
         ),
@@ -481,6 +480,9 @@ window.addEventListener("elementor/frontend/init", () => {
           settings.selectors.directAccordionItemTitles,
         );
 
+      // we don't allow this as a configurable option for our AB test component
+      // default to multiple to allow users to have more than one item open at a time
+      const maxItemsExpended = "multiple"; // choices are "one" or "multiple"
       if ("one" === maxItemsExpended) {
         this.closeAllItems(directAccordionItems, directAccordionItemTitles);
       }
@@ -570,10 +572,7 @@ window.addEventListener("elementor/frontend/init", () => {
     }
 
     getAnimationDuration() {
-      const { size, unit } = this.getElementSettings(
-        "n_accordion_animation_duration",
-      );
-      return size * ("ms" === unit ? 1 : 1000);
+      return 400; // duration in ms
     }
   }
 
