@@ -96,7 +96,6 @@ class PHAB_Nested_Accordion_Widget extends Widget_Nested_Base
         return [
             $this->item_content_container(1),
             $this->item_content_container(2),
-            $this->item_content_container(3),
         ];
     }
 
@@ -183,12 +182,10 @@ class PHAB_Nested_Accordion_Widget extends Widget_Nested_Base
                     [
                         'item_title' => esc_html__('Item #2', 'elementor'),
                     ],
-                    [
-                        'item_title' => esc_html__('Item #3', 'elementor'),
-                    ],
                 ],
                 'title_field' => '{{{ item_title }}}',
-                'button_text' => esc_html__('Add Item', 'elementor'),
+                'prevent_empty' => true, // Prevents removing all items
+                'classes' => 'phab-nested-accordion-repeater',    // set this class so our editor hook can find it
             ]
         );
 
