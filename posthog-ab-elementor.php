@@ -114,6 +114,13 @@ function phab_enqueue_widget_assets()
 		true // footer
 	);
 
+	wp_register_style(
+		'phab-nested-accordion',
+		PHAB_URL . 'assets/css/phab-nested-accordion.css',
+		[],
+		PHAB_VERSION
+	);
+
 	// wp_register_script(
 	// 	'phab-nested-accordion',
 	// 	PHAB_URL . 'assets/js/editor/index.js',

@@ -1,0 +1,210 @@
+/* =============================================================================
+   phab-nested-accordion.css
+   Adapted from Elementor's widget-nested-accordion SCSS.
+   Uses <details>/<summary> native elements + CSS custom properties.
+   ============================================================================= */
+
+.elementor-widget-phab-accordion {
+  --phab-accordion-title-font-size: 1.25rem;
+  --phab-accordion-border-width: 1px;
+  --phab-accordion-border-color: #d5d8dc;
+  --phab-accordion-border-style: solid;
+  --phab-accordion-item-space-between: 0px;
+  --phab-accordion-padding: 14px 20px;
+  --phab-accordion-border-radius: 0px;
+  --phab-accordion-icon-size: 15px;
+  --phab-accordion-icon-gap: 0 10px;
+  --phab-accordion-title-icon-order: initial; /* end = initial, start = -1 */
+  --phab-accordion-title-normal-color: #333;
+  --phab-accordion-title-hover-color: #333;
+  --phab-accordion-title-active-color: #333;
+  --phab-accordion-icon-normal-color: var(--phab-accordion-title-normal-color);
+  --phab-accordion-icon-hover-color: var(--phab-accordion-title-hover-color);
+  --phab-accordion-icon-active-color: var(--phab-accordion-title-active-color);
+
+  width: 100%;
+}
+
+/* ── Wrapper ─────────────────────────────────────────────────────────────── */
+
+.phab-n-accordion {
+  width: 100%;
+}
+
+/* ── Remove default <details> disclosure triangle ────────────────────────── */
+
+.phab-n-accordion-item > summary::-webkit-details-marker,
+.phab-n-accordion-item > .phab-n-accordion-item-title::-webkit-details-marker {
+  display: none;
+}
+
+.phab-n-accordion-item > .phab-n-accordion-item-title {
+  list-style: none;
+}
+
+/* ── Item ────────────────────────────────────────────────────────────────── */
+
+.phab-n-accordion-item {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.phab-n-accordion-item:not(:last-child) {
+  margin-block-end: var(--phab-accordion-item-space-between);
+}
+
+/* Content container border */
+.phab-n-accordion-item > .e-con {
+  border: var(--phab-accordion-border-width) var(--phab-accordion-border-style)
+    var(--phab-accordion-border-color);
+}
+
+/* ── Header / Summary ────────────────────────────────────────────────────── */
+
+.phab-n-accordion-item-title {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: var(--phab-accordion-padding);
+  border-width: var(--phab-accordion-border-width);
+  border-color: var(--phab-accordion-border-color);
+  border-style: var(--phab-accordion-border-style);
+  border-radius: var(--phab-accordion-border-radius);
+  gap: var(--phab-accordion-icon-gap);
+  color: var(--phab-accordion-title-normal-color);
+  cursor: pointer;
+  user-select: none;
+  list-style: none; /* Firefox */
+}
+
+.phab-n-accordion-item-title:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: -2px;
+}
+
+.phab-n-accordion-item-title-header {
+  display: flex;
+  flex: 1;
+}
+
+.phab-n-accordion-item-title-header h1,
+.phab-n-accordion-item-title-header h2,
+.phab-n-accordion-item-title-header h3,
+.phab-n-accordion-item-title-header h4,
+.phab-n-accordion-item-title-header h5,
+.phab-n-accordion-item-title-header h6,
+.phab-n-accordion-item-title-header p {
+  margin-block-start: 0;
+  margin-block-end: 0;
+}
+
+.phab-n-accordion-item-title-text {
+  font-size: var(--phab-accordion-title-font-size);
+}
+
+/* ── Icon ────────────────────────────────────────────────────────────────── */
+
+.phab-n-accordion-item-title-icon {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  order: var(--phab-accordion-title-icon-order);
+  flex-shrink: 0;
+}
+
+.phab-n-accordion-item-title-icon span {
+  height: var(--phab-accordion-icon-size);
+  display: flex;
+  align-items: center;
+}
+
+.phab-n-accordion-item-title-icon span > i {
+  color: var(--phab-accordion-icon-normal-color);
+  font-size: var(--phab-accordion-icon-size);
+}
+
+.phab-n-accordion-item-title-icon span > svg {
+  fill: var(--phab-accordion-icon-normal-color);
+  height: var(--phab-accordion-icon-size);
+  width: auto;
+}
+
+/* Default: show closed icon */
+.phab-n-accordion-item-title-icon .e-opened {
+  display: none;
+}
+
+.phab-n-accordion-item-title-icon .e-closed {
+  display: flex;
+}
+
+/* ── Hover state ─────────────────────────────────────────────────────────── */
+
+.phab-n-accordion-item:not([open]) > .phab-n-accordion-item-title:hover {
+  color: var(--phab-accordion-title-hover-color);
+}
+
+.phab-n-accordion-item:not([open])
+  > .phab-n-accordion-item-title:hover
+  .phab-n-accordion-item-title-icon
+  span
+  > i {
+  color: var(--phab-accordion-icon-hover-color);
+}
+
+.phab-n-accordion-item:not([open])
+  > .phab-n-accordion-item-title:hover
+  .phab-n-accordion-item-title-icon
+  span
+  > svg {
+  fill: var(--phab-accordion-icon-hover-color);
+}
+
+/* ── Closed state: hide the content container ────────────────────────────── */
+
+.phab-n-accordion-item:not([open]) > .e-con {
+  display: none;
+}
+
+/* ── Open state ──────────────────────────────────────────────────────────── */
+
+.phab-n-accordion-item[open] > .phab-n-accordion-item-title {
+  color: var(--phab-accordion-title-active-color);
+}
+
+.phab-n-accordion-item[open]
+  > .phab-n-accordion-item-title
+  .phab-n-accordion-item-title-icon
+  .e-opened {
+  display: flex;
+}
+
+.phab-n-accordion-item[open]
+  > .phab-n-accordion-item-title
+  .phab-n-accordion-item-title-icon
+  .e-closed {
+  display: none;
+}
+
+.phab-n-accordion-item[open]
+  > .phab-n-accordion-item-title
+  .phab-n-accordion-item-title-icon
+  span
+  > i {
+  color: var(--phab-accordion-icon-active-color);
+}
+
+.phab-n-accordion-item[open]
+  > .phab-n-accordion-item-title
+  .phab-n-accordion-item-title-icon
+  span
+  > svg {
+  fill: var(--phab-accordion-icon-active-color);
+}
+
+/* ── Editor: always show content so it's editable ───────────────────────── */
+
+.elementor-editor-active .phab-n-accordion-item:not([open]) > .e-con {
+  display: block;
+}
