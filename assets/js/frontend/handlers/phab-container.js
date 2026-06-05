@@ -2,7 +2,7 @@
 // after the frontend is initialized.  If the class is defined outside
 // of this listener, the elementorModules may not be available yet and the class definition will fail
 window.addEventListener("elementor/frontend/init", () => {
-  class PhabNestedAccordion extends elementorModules.frontend.handlers.Base {
+  class PhabContainer extends elementorModules.frontend.handlers.Base {
     constructor(...args) {
       super(...args);
 
@@ -46,7 +46,7 @@ window.addEventListener("elementor/frontend/init", () => {
 
     onInit(...args) {
       console.log(
-        "phab: Initializing frontend handler for phab-nested-accordion with settings:",
+        "phab: Initializing frontend handler for phab-container with settings:",
         this.getSettings(),
       );
       super.onInit(...args);
@@ -236,14 +236,14 @@ window.addEventListener("elementor/frontend/init", () => {
   }
 
   console.log(
-    `Elementor frontend initialized for phab-nested-accordion`,
+    `Elementor frontend initialized for phab-container`,
     elementorFrontend,
   );
 
   // this is the new, recommended way to attach a handler to an elementor widget.
   // https://developers.elementor.com/a-new-method-for-attaching-a-js-handler-to-an-elementor-widget/
   elementorFrontend.elementsHandler.attachHandler(
-    "phab-nested-accordion",
-    PhabNestedAccordion,
+    "phab-container",
+    PhabContainer,
   );
 });

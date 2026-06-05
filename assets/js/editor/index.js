@@ -1,4 +1,4 @@
-console.log(`Elementor loaded editor phab-nested-accordion `);
+console.log(`Elementor loaded editor phab-container `);
 
 // this is the magic that makes the nested element work in the editor.
 // It listens for the event fired by elementor when the nested element
@@ -32,7 +32,7 @@ elementorCommon.elements.$window.on(
       extends elementor.modules.elements.types.NestedElementBase
     {
       getType() {
-        return "phab-nested-accordion";
+        return "phab-container";
       }
       getView() {
         return View;
@@ -50,17 +50,17 @@ jQuery(window).on("elementor:init", function () {
   // the structure of the A/B test items.
   // We also remove the "Add Item" button to enforce a fixed number of items
   elementor.hooks.addAction(
-    "panel/open_editor/widget/phab-nested-accordion",
+    "panel/open_editor/widget/phab-container",
     function (panel, model, view) {
       console.log(
         "phab: Custom action triggered for opening the widget editor panel!",
       );
 
-      if ("phab-nested-accordion" === model.get("widgetType")) {
+      if ("phab-container" === model.get("widgetType")) {
         // Wait for the control to render
         setTimeout(function () {
           // Find the repeater control element and disable drag/drop
-          var $repeater = panel.$el.find(".phab-nested-accordion-repeater");
+          var $repeater = panel.$el.find(".phab-container-repeater");
 
           console.log("phab: Found the repeater control:", $repeater);
 
@@ -88,7 +88,7 @@ jQuery(window).on("elementor:init", function () {
 
       // Find the "Add Item" button wrapper container and drop it
       panel.$el
-        .find(".phab-nested-accordion-repeater .elementor-repeater-add")
+        .find(".phab-container-repeater .elementor-repeater-add")
         .remove();
     },
   );

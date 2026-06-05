@@ -18,7 +18,7 @@ if (! defined('ABSPATH')) {
  *
  * @since 3.15.0
  */
-class PHAB_Nested_Accordion_Widget extends Widget_Nested_Base
+class PHAB_Container_Widget extends Widget_Nested_Base
 {
 
     private $optimized_markup = null;
@@ -31,7 +31,7 @@ class PHAB_Nested_Accordion_Widget extends Widget_Nested_Base
 
     public function get_name()
     {
-        return 'phab-nested-accordion';
+        return 'phab-container';
     }
 
     public function get_title()
@@ -46,17 +46,17 @@ class PHAB_Nested_Accordion_Widget extends Widget_Nested_Base
 
     public function get_keywords()
     {
-        return ['nested', 'tabs', 'accordion', 'toggle'];
+        return ['nested', 'toggle'];
     }
 
     public function get_style_depends(): array
     {
-        return ['phab-nested-accordion'];
+        return ['phab-container'];
     }
 
     public function get_script_depends(): array
     {
-        return ['phab-nested-accordion-frontend'];
+        return ['phab-container-frontend'];
     }
 
     public function show_in_panel(): bool
@@ -169,7 +169,7 @@ class PHAB_Nested_Accordion_Widget extends Widget_Nested_Base
                 ],
                 'title_field' => '{{{ item_title }}}',
                 'prevent_empty' => true, // Prevents removing all items
-                'classes' => 'phab-nested-accordion-repeater',    // set this class so our editor hook can find it
+                'classes' => 'phab-container-repeater',    // set this class so our editor hook can find it
             ]
         );
 

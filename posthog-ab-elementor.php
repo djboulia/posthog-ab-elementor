@@ -82,13 +82,13 @@ function phab_register_widgets($widgets_manager)
 	require_once PHAB_DIR . 'widgets/class-accordion-widget.php';
 	$widgets_manager->register(new \PHAB_Accordion_Widget());
 
-	require_once PHAB_DIR . 'widgets/phab-nested-accordion.php';
-	$widgets_manager->register(new \PHAB_Nested_Accordion_Widget());
+	require_once PHAB_DIR . 'widgets/phab-container.php';
+	$widgets_manager->register(new \PHAB_Container_Widget());
 }
 
 add_action('elementor/editor/before_enqueue_scripts', function () {
 	wp_enqueue_script(
-		'phab-nested-accordion',
+		'phab-container',
 		PHAB_URL . 'assets/js/editor/index.js',
 		['elementor-editor'], // depends on Elementor editor JS
 		'1.0',
@@ -114,15 +114,15 @@ function phab_enqueue_widget_assets()
 	);
 
 	wp_register_style(
-		'phab-nested-accordion',
-		PHAB_URL . 'assets/css/phab-nested-accordion.css',
+		'phab-container',
+		PHAB_URL . 'assets/css/phab-container.css',
 		[],
 		PHAB_VERSION
 	);
 
 	wp_register_script(
-		'phab-nested-accordion-frontend',
-		PHAB_URL . 'assets/js/frontend/handlers/phab-nested-accordion.js',
+		'phab-container-frontend',
+		PHAB_URL . 'assets/js/frontend/handlers/phab-container.js',
 		[],
 		PHAB_VERSION,
 		true // footer
