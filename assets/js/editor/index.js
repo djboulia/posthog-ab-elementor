@@ -1,6 +1,6 @@
 console.log(`Elementor loaded editor phab-nested-accordion `);
 
-// this iss the magic that makes the nested element work in the editor.
+// this is the magic that makes the nested element work in the editor.
 // It listens for the event fired by elementor when the nested element
 // type is loaded, and then registers our custom nested element type with
 // the editor. This allows us to use our custom nested element in the

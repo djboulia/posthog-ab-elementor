@@ -1,7 +1,6 @@
 <?php
 
 use Elementor\Controls_Manager;
-use Elementor\Icons_Manager;
 use Elementor\Modules\NestedElements\Base\Widget_Nested_Base;
 use Elementor\Modules\NestedElements\Controls\Control_Nested_Repeater;
 use Elementor\Plugin;
@@ -106,24 +105,24 @@ class PHAB_Nested_Accordion_Widget extends Widget_Nested_Base
 
     protected function get_default_children_placeholder_selector()
     {
-        return '.e-n-accordion';
+        return '.phab-accordion';
     }
 
     protected function get_default_children_container_placeholder_selector()
     {
-        return '.e-n-accordion-item';
+        return '.phab-accordion-item';
     }
 
     protected function get_html_wrapper_class()
     {
-        return 'elementor-widget-n-accordion';
+        return 'phab-widget-accordion';
     }
 
     protected function register_controls()
     {
         if (null === $this->optimized_markup) {
             $this->optimized_markup = Plugin::$instance->experiments->is_feature_active('e_optimized_markup') && ! $this->has_widget_inner_wrapper();
-            $this->widget_container_selector = $this->optimized_markup ? '' : ' > .elementor-widget-container';
+            $this->widget_container_selector = $this->optimized_markup ? '' : ' > .phab-widget-accordion';
         }
 
         $this->start_controls_section('section_items', [
@@ -174,66 +173,7 @@ class PHAB_Nested_Accordion_Widget extends Widget_Nested_Base
             ]
         );
 
-        // we don't want to allow the icons to be configured, so just keep them in
-        // settings as hidden controls with default values for the plus and minus icons.
-        $this->add_control(
-            'accordion_item_title_icon',
-            [
-                'label' => esc_html__('Expand', 'posthog-ab'),
-                'type' => Controls_Manager::HIDDEN, // instead of ICON
-                'default' => [
-                    'value' => 'fas fa-plus',
-                    'library' => 'fa-solid',
-                ],
-                'skin' => 'inline',
-                'label_block' => false,
-            ]
-        );
-
-        $this->add_control(
-            'accordion_item_title_icon_active',
-            [
-                'label' => esc_html__('Collapse', 'posthog-ab'),
-                'type' => Controls_Manager::HIDDEN, // instead of ICON
-                'fa4compatibility' => 'icon_active',
-                'default' => [
-                    'value' => 'fas fa-minus',
-                    'library' => 'fa-solid',
-                ],
-                'condition' => [
-                    'accordion_item_title_icon[value]!' => '',
-                ],
-                'skin' => 'inline',
-                'label_block' => false,
-            ]
-        );
-
         $this->end_controls_section();
-    }
-
-    private function is_active_icon_exist(array $settings): bool
-    {
-        return array_key_exists('accordion_item_title_icon_active', $settings) && ! empty($settings['accordion_item_title_icon_active']) && ! empty($settings['accordion_item_title_icon_active']['value']);
-    }
-
-    private function render_accordion_icons(array $settings)
-    {
-        $icon_html = Icons_Manager::try_get_icon_html($settings['accordion_item_title_icon'], ['aria-hidden' => 'true']);
-        $icon_active_html = $this->is_active_icon_exist($settings)
-            ? Icons_Manager::try_get_icon_html($settings['accordion_item_title_icon_active'], ['aria-hidden' => 'true'])
-            : $icon_html;
-
-        ob_start();
-?>
-        <span class='e-n-accordion-item-title-icon'>
-            <span class='e-opened'><?php echo $icon_active_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped 
-                                    ?></span>
-            <span class='e-closed'><?php echo $icon_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped 
-                                    ?></span>
-        </span>
-
-        <?php
-        return ob_get_clean();
     }
 
     protected function render()
@@ -242,19 +182,18 @@ class PHAB_Nested_Accordion_Widget extends Widget_Nested_Base
         $items = $settings['items'];
         $id_int = substr($this->get_id_int(), 0, 3);
         $items_title_html = '';
-        $icons_content = $this->render_accordion_icons($settings);
-        $this->add_render_attribute('elementor-accordion', 'class', 'e-n-accordion');
+        $this->add_render_attribute('elementor-accordion', 'class', 'phab-accordion');
         $this->add_render_attribute('elementor-accordion', 'aria-label', 'Accordion. Open links with Enter or Space, close with Escape, and navigate with Arrow Keys');
         $default_state = 'expanded'; // for our AB test, we want all items to be expanded by default, so we set this to 'expanded' and ignore any user setting for default state
         $flag_key         = sanitize_key($settings['flag_key'] ?? '');
         $is_editor        = \Elementor\Plugin::$instance->editor->is_edit_mode();
-        $variant_key     = sanitize_key($settings['items'][1]['item_title'] ?? 'test'); // we use the first variant's name as the variant key for the frontend, since the editor only shows one item at a time, and it makes more sense to have the variant key reflect the actual variant being edited. In a real implementation, we might want to allow the user to specify the variant key directly in the settings, but for this example we'll just derive it from the first item's title.
+        $variant_key     = sanitize_key($settings['items'][1]['item_title'] ?? 'test'); // we use the first variant's name as the variant key for the frontend
 
         // ── Control slot ──────────────────────────────────────────────────────
         $control_style = '';
 
-        // ── Validation notices (editor only) ──────────────────────────────────
         if ($is_editor) {
+            // ── Validation notice (editor only) ──────────────────────────────────
             if (! $flag_key) {
                 echo '<div style="padding:.75em 1em;background:#fff3cd;border-left:4px solid #ffc107;margin-bottom:8px;font-size:13px;">' .
                     esc_html__('⚠ Set a Feature Flag Key in the Experiment panel.', 'posthog-ab') .
@@ -265,11 +204,10 @@ class PHAB_Nested_Accordion_Widget extends Widget_Nested_Base
                 $accordion_count = $index + 1;
                 $item_setting_key = $this->get_repeater_setting_key('item_title', 'items', $index);
                 $item_summary_key = $this->get_repeater_setting_key('item_summary', 'items', $index);
-                $item_classes = ['e-n-accordion-item'];
-                $item_id =  'e-n-accordion-item-' . $id_int . $index;
+                $item_classes = ['phab-accordion-item'];
+                $item_id =  'phab-accordion-item-' . $id_int . $index;
                 $item_title = $item['item_title'];
                 $is_open = 'expanded' === $default_state && 0 === $index ? 'open' : '';
-                $aria_expanded = 'expanded' === $default_state && 0 === $index;
 
                 $this->add_render_attribute($item_setting_key, [
                     'id' => $item_id,
@@ -277,10 +215,10 @@ class PHAB_Nested_Accordion_Widget extends Widget_Nested_Base
                 ]);
 
                 $this->add_render_attribute($item_summary_key, [
-                    'class' => ['e-n-accordion-item-title'],
+                    'class' => ['phab-accordion-item-title'],
                     'data-accordion-index' => $accordion_count,
                     'tabindex' => 0 === $index ? 0 : -1,
-                    'aria-expanded' => $aria_expanded ? 'true' : 'false',
+                    'aria-expanded' => 'true',
                     'aria-controls' => $item_id,
                 ]);
 
@@ -295,13 +233,10 @@ class PHAB_Nested_Accordion_Widget extends Widget_Nested_Base
                 $item_content = ob_get_clean();
 
                 ob_start();
-        ?>
+?>
                 <details <?php echo wp_kses_post($title_render_attributes); ?>>
                     <summary <?php echo wp_kses_post($summary_render_attributes); ?>>
-                        <span class='e-n-accordion-item-title-header'><?php echo wp_kses_post("<div class=\"e-n-accordion-item-title-text\"> $item_title </div>"); ?></span>
-                        <?php if (! empty($settings['accordion_item_title_icon']['value'])) {
-                            echo $icons_content; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-                        } ?>
+                        <span class='phab-item-title-header'><?php echo wp_kses_post("<div class=\"phab-accordion-item-title-text\"> $item_title </div>"); ?></span>
                     </summary>
                     <?php echo $item_content; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped 
                     ?>
@@ -317,12 +252,15 @@ class PHAB_Nested_Accordion_Widget extends Widget_Nested_Base
             </div>
         <?php
         } else {
+            // on the frontend, we just render the A and B children wrapped with attributes so that the
+            // JS running on the page can show/hide the right experiment
+
+            // ── Control slot ──────────────────────────────────────────────────────
             printf(
                 '<div data-phab-flag="%1$s" data-phab-variant="control" class="phab-ab-container phab-control" style="%2$s">',
                 esc_attr($flag_key),
                 esc_attr($control_style)
             );
-            // on the frontend, we just render the content and let the JS handle the accordion behavior.
             $this->print_child(0);
             echo '</div>';
 
@@ -370,7 +308,7 @@ class PHAB_Nested_Accordion_Widget extends Widget_Nested_Base
     {
         return array_merge(parent::get_initial_config(), [
             'support_improved_repeaters' => true,
-            'target_container' => ['.e-n-accordion'],
+            'target_container' => ['.phab-accordion'],
             'node' => 'details',
             'is_interlaced' => true,
         ]);
@@ -382,13 +320,13 @@ class PHAB_Nested_Accordion_Widget extends Widget_Nested_Base
         <#
             const elementUid=view.getIDInt().toString().substring( 0, 3 ) + view.collection.length;
 
-            const itemWrapperAttributes={ 'id' : 'e-n-accordion-item-' + elementUid, 'class' : [ 'e-n-accordion-item' , 'e-normal' ],
+            const itemWrapperAttributes={ 'id' : 'phab-accordion-item-' + elementUid, 'class' : [ 'phab-accordion-item' , 'e-normal' ],
             };
 
-            const itemTitleAttributes={ 'class' : [ 'e-n-accordion-item-title' ], 'data-accordion-index' : view.collection.length + 1, 'tabindex' : -1, 'aria-expanded' : 'false' , 'aria-controls' : 'e-n-accordion-item-' + elementUid,
+            const itemTitleAttributes={ 'class' : [ 'phab-accordion-item-title' ], 'data-accordion-index' : view.collection.length + 1, 'tabindex' : -1, 'aria-expanded' : 'false' , 'aria-controls' : 'phab-accordion-item-' + elementUid,
             };
 
-            const itemTitleTextAttributes={ 'class' : [ 'e-n-accordion-item-title-text' ], 'data-binding-index' : view.collection.length + 1, 'data-binding-type' : 'repeater-item' , 'data-binding-repeater-name' : 'items' , 'data-binding-setting' : ['item_title', 'element_css_id' ], 'data-binding-config' : JSON.stringify({ 'element_css_id' : {
+            const itemTitleTextAttributes={ 'class' : [ 'phab-accordion-item-title-text' ], 'data-binding-index' : view.collection.length + 1, 'data-binding-type' : 'repeater-item' , 'data-binding-repeater-name' : 'items' , 'data-binding-setting' : ['item_title', 'element_css_id' ], 'data-binding-config' : JSON.stringify({ 'element_css_id' : {
             editType: 'attribute' ,
             attr: 'id' ,
             selector: 'details'
@@ -405,12 +343,8 @@ class PHAB_Nested_Accordion_Widget extends Widget_Nested_Base
 
             <details {{{ view.getRenderAttributeString( 'details-container' ) }}}>
                 <summary {{{ view.getRenderAttributeString( 'summary-container' ) }}}>
-                    <span class="e-n-accordion-item-title-header">
+                    <span class="phab-item-title-header">
                         <div {{{ view.getRenderAttributeString( 'text-container' ) }}}>{{{ data.item_title }}}</div>
-                    </span>
-                    <span class="e-n-accordion-item-title-icon">
-                        <span class="e-opened"><i aria-hidden="true" class="fas fa-minus"></i></span>
-                        <span class="e-closed"><i aria-hidden="true" class="fas fa-plus"></i></span>
                     </span>
                 </summary>
             </details>
@@ -430,14 +364,10 @@ class PHAB_Nested_Accordion_Widget extends Widget_Nested_Base
                     </div>
                     <# } #>
 
-                        <div class="e-n-accordion" aria-label="Accordion. Open links with Enter or Space, close with Escape, and navigate with Arrow Keys">
+                        <div class="phab-accordion" aria-label="Accordion. Open links with Enter or Space, close with Escape, and navigate with Arrow Keys">
                             <# if ( settings['items'] ) {
                                 const elementUid=view.getIDInt().toString().substring( 0, 3 ),
-                                defaultState='expanded' ,
-                                itemTitleIcon=elementor.helpers.renderIcon( view, settings['accordion_item_title_icon'], { 'aria-hidden' : true }, 'i' , 'object' ) ?? '' ,
-                                itemTitleIconActive=''===settings.accordion_item_title_icon_active.value
-                                ? itemTitleIcon
-                                : elementor.helpers.renderIcon( view, settings['accordion_item_title_icon_active'], { 'aria-hidden' : true }, 'i' , 'object' );
+                                defaultState='expanded'
                                 #>
 
                                 <# _.each( settings['items'], function( item, index ) {
@@ -446,23 +376,21 @@ class PHAB_Nested_Accordion_Widget extends Widget_Nested_Base
                                     itemTitleTextKey='item-title-text-' + itemUid,
                                     itemWrapperKey=itemUid,
                                     itemTitleKey='item-' + itemUid,
-                                    ariaExpanded='expanded'===defaultState && 0===index ? 'true' : 'false' ;
+                                    ariaExpanded='true' ;
 
-                                    itemId='e-n-accordion-item-' + itemUid;
+                                    itemId='phab-accordion-item-' + itemUid;
 
-                                    const itemWrapperAttributes={ 'id' : itemId, 'class' : [ 'e-n-accordion-item' , 'e-normal' ],
+                                    const itemWrapperAttributes={ 'id' : itemId, 'class' : [ 'phab-accordion-item' , 'e-normal' ],
                                     };
 
-                                    if ( defaultState==='expanded' && index===0) {
                                     itemWrapperAttributes['open']=true;
-                                    }
 
                                     view.addRenderAttribute( itemWrapperKey, itemWrapperAttributes );
 
-                                    view.addRenderAttribute( itemTitleKey, { 'class' : ['e-n-accordion-item-title'], 'data-accordion-index' : itemCount, 'tabindex' : 0===index ? 0 : -1, 'aria-expanded' : ariaExpanded, 'aria-controls' : itemId,
+                                    view.addRenderAttribute( itemTitleKey, { 'class' : ['phab-accordion-item-title'], 'data-accordion-index' : itemCount, 'tabindex' : 0===index ? 0 : -1, 'aria-expanded' : ariaExpanded, 'aria-controls' : itemId,
                                     });
 
-                                    view.addRenderAttribute( itemTitleTextKey, { 'class' : ['e-n-accordion-item-title-text'], 'data-binding-index' : itemCount, 'data-binding-type' : 'repeater-item' , 'data-binding-repeater-name' : 'items' , 'data-binding-setting' : ['item_title', 'element_css_id' ], 'data-binding-config' : JSON.stringify({ 'element_css_id' : {
+                                    view.addRenderAttribute( itemTitleTextKey, { 'class' : ['phab-accordion-item-title-text'], 'data-binding-index' : itemCount, 'data-binding-type' : 'repeater-item' , 'data-binding-repeater-name' : 'items' , 'data-binding-setting' : ['item_title', 'element_css_id' ], 'data-binding-config' : JSON.stringify({ 'element_css_id' : {
                                     editType: 'attribute' ,
                                     attr: 'id' ,
                                     selector: 'details'
@@ -475,17 +403,11 @@ class PHAB_Nested_Accordion_Widget extends Widget_Nested_Base
 
                                     <details {{{ view.getRenderAttributeString( itemWrapperKey ) }}}>
                                         <summary {{{ view.getRenderAttributeString( itemTitleKey ) }}}>
-                                            <span class="e-n-accordion-item-title-header">
+                                            <span class="phab-item-title-header">
                                                 <div {{{ view.getRenderAttributeString( itemTitleTextKey ) }}}>
                                                     {{{ item.item_title }}}
                                                 </div>
                                             </span>
-                                            <# if (settings.accordion_item_title_icon.value) { #>
-                                                <span class="e-n-accordion-item-title-icon">
-                                                    <span class="e-opened">{{{ itemTitleIconActive.value }}}</span>
-                                                    <span class="e-closed">{{{ itemTitleIcon.value }}}</span>
-                                                </span>
-                                                <# } #>
                                         </summary>
                                     </details>
                                     <# } ); #>
