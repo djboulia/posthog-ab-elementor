@@ -243,10 +243,131 @@ class Settings
 		return $rows;
 	}
 
+	// -------------------------------------------------------------------------
+	// Widget A/B index
+	// -------------------------------------------------------------------------
+
+	/**
+	 * Recursively walks an Elementor elements tree and collects every
+	 * phab-container widget's settings along with the post it lives in.
+	 */
+	private function collect_ab_widgets(array $elements, int $post_id, string $post_title, string $post_type, string $post_status, array &$out): void
+	{
+		foreach ($elements as $el) {
+			if (($el['widgetType'] ?? '') === 'phab-container') {
+				$s = $el['settings'] ?? [];
+				if (! empty($s['flag_key'])) {
+					$out[] = [
+						'id'             => $post_id,
+						'title'          => $post_title,
+						'post_type'      => $post_type,
+						'post_status'    => $post_status,
+						'flag_key'       => $s['flag_key'],
+						'variant_key'    => $s['variant_key'] ?? 'test',
+					];
+				}
+			}
+			// Recurse into child elements (sections → columns → widgets, or containers).
+			if (! empty($el['elements'])) {
+				$this->collect_ab_widgets($el['elements'], $post_id, $post_title, $post_type, $post_status, $out);
+			}
+		}
+	}
+
+	/**
+	 * Returns every phab-container widget instance found across all published content.
+	 */
+	private function get_ab_widget_instances(): array
+	{
+		global $wpdb;
+
+		$results = $wpdb->get_results($wpdb->prepare(
+			"SELECT p.ID, p.post_title, p.post_type, p.post_status, pm.meta_value
+			 FROM {$wpdb->posts} p
+			 INNER JOIN {$wpdb->postmeta} pm ON pm.post_id = p.ID
+			 WHERE pm.meta_key = '_elementor_data'
+			   AND pm.meta_value LIKE %s
+			   AND p.post_status = 'publish'
+			 ORDER BY p.post_title ASC",
+			'%' . $wpdb->esc_like('phab-container') . '%'
+		));
+
+		$rows = [];
+		foreach ($results as $row) {
+			$data = json_decode($row->meta_value, true);
+			if (! is_array($data)) {
+				continue;
+			}
+			$this->collect_ab_widgets(
+				$data,
+				(int) $row->ID,
+				$row->post_title ?: __('(no title)', 'posthog-ab'),
+				$row->post_type,
+				$row->post_status,
+				$rows
+			);
+		}
+		return $rows;
+	}
+
+	private function render_ab_widgets_table(): void
+	{
+		$rows = $this->get_ab_widget_instances();
+	?>
+		<h2><?php esc_html_e('Active Widget A/B Tests', 'posthog-ab'); ?></h2>
+		<p><?php esc_html_e('Every A/B widget instance found across all Elementor-built pages and posts.', 'posthog-ab'); ?></p>
+		<?php if (empty($rows)) : ?>
+			<p><em><?php esc_html_e('No A/B widgets found. Add the widget to any Elementor page to get started.', 'posthog-ab'); ?></em></p>
+		<?php else : ?>
+			<table class="widefat striped" style="max-width:900px;">
+				<thead>
+					<tr>
+						<th><?php esc_html_e('Page / Post', 'posthog-ab'); ?></th>
+						<th><?php esc_html_e('Type', 'posthog-ab'); ?></th>
+						<th><?php esc_html_e('Status', 'posthog-ab'); ?></th>
+						<th><?php esc_html_e('Feature Flag Key', 'posthog-ab'); ?></th>
+						<th><?php esc_html_e('Variant Key', 'posthog-ab'); ?></th>
+						<th><?php esc_html_e('Actions', 'posthog-ab'); ?></th>
+					</tr>
+				</thead>
+				<tbody>
+					<?php foreach ($rows as $row) :
+						$edit_url     = get_edit_post_link($row['id']) . '&action=elementor';
+						$view_url     = get_permalink($row['id']);
+					?>
+						<tr>
+							<td>
+								<strong>
+									<a href="<?php echo esc_url($edit_url); ?>">
+										<?php echo esc_html($row['title']); ?>
+									</a>
+								</strong>
+							</td>
+							<td><?php echo esc_html($row['post_type']); ?></td>
+							<td><?php echo esc_html(ucfirst($row['post_status'])); ?></td>
+							<td><code><?php echo esc_html($row['flag_key']); ?></code></td>
+							<td><code><?php echo esc_html($row['variant_key']); ?></code></td>
+							<td>
+								<a href="<?php echo esc_url($edit_url); ?>" class="button button-small">
+									<?php esc_html_e('Edit', 'posthog-ab'); ?>
+								</a>
+								<?php if ('publish' === $row['post_status'] && $view_url) : ?>
+									<a href="<?php echo esc_url($view_url); ?>" class="button button-small" target="_blank" rel="noopener">
+										<?php esc_html_e('View', 'posthog-ab'); ?>
+									</a>
+								<?php endif; ?>
+							</td>
+						</tr>
+					<?php endforeach; ?>
+				</tbody>
+			</table>
+		<?php endif;
+	}
+
 	private function render_page_variants_table(): void
 	{
 		$rows = $this->get_page_variants();
-	?>
+		?>
 		<h2><?php esc_html_e('Active Page Variant Tests', 'posthog-ab'); ?></h2>
 		<p><?php esc_html_e('All pages and posts with a PostHog page-level A/B test configured.', 'posthog-ab'); ?></p>
 		<?php if (empty($rows)) : ?>
@@ -327,6 +448,9 @@ class Settings
 				submit_button();
 				?>
 			</form>
+
+			<hr>
+			<?php $this->render_ab_widgets_table(); ?>
 
 			<hr>
 			<?php $this->render_page_variants_table(); ?>
