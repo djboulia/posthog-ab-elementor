@@ -46,7 +46,7 @@ class PHAB_Container_Widget extends Widget_Nested_Base
 
     public function get_keywords()
     {
-        return ['nested', 'toggle'];
+        return ['nested', 'toggle', 'ab', 'test', 'posthog',];
     }
 
     public function get_style_depends(): array
@@ -105,12 +105,12 @@ class PHAB_Container_Widget extends Widget_Nested_Base
 
     protected function get_default_children_placeholder_selector()
     {
-        return '.phab-accordion';
+        return '.phab-container';
     }
 
     protected function get_default_children_container_placeholder_selector()
     {
-        return '.phab-accordion-item';
+        return '.phab-container-item';
     }
 
     protected function get_html_wrapper_class()
@@ -182,7 +182,7 @@ class PHAB_Container_Widget extends Widget_Nested_Base
         $items = $settings['items'];
         $id_int = substr($this->get_id_int(), 0, 3);
         $items_title_html = '';
-        $this->add_render_attribute('elementor-accordion', 'class', 'phab-accordion');
+        $this->add_render_attribute('elementor-accordion', 'class', 'phab-container');
         $this->add_render_attribute('elementor-accordion', 'aria-label', 'Accordion. Open links with Enter or Space, close with Escape, and navigate with Arrow Keys');
         $default_state = 'expanded'; // for our AB test, we want all items to be expanded by default, so we set this to 'expanded' and ignore any user setting for default state
         $flag_key         = sanitize_key($settings['flag_key'] ?? '');
@@ -204,9 +204,9 @@ class PHAB_Container_Widget extends Widget_Nested_Base
                 $accordion_count = $index + 1;
                 $item_setting_key = $this->get_repeater_setting_key('item_title', 'items', $index);
                 $item_summary_key = $this->get_repeater_setting_key('item_summary', 'items', $index);
-                $item_classes = ['phab-accordion-item'];
-                $item_id =  'phab-accordion-item-' . $id_int . $index;
-                $item_title = $item['item_title'];
+                $item_classes = ['phab-container-item'];
+                $item_id =  'phab-container-item-' . $id_int . $index;
+                $item_title = $index === 0 ? 'A: ' : 'B: ' . $item['item_title'];
                 $is_open = 'expanded' === $default_state && 0 === $index ? 'open' : '';
 
                 $this->add_render_attribute($item_setting_key, [
@@ -215,7 +215,7 @@ class PHAB_Container_Widget extends Widget_Nested_Base
                 ]);
 
                 $this->add_render_attribute($item_summary_key, [
-                    'class' => ['phab-accordion-item-title'],
+                    'class' => ['phab-container-item-title'],
                     'data-accordion-index' => $accordion_count,
                     'tabindex' => 0 === $index ? 0 : -1,
                     'aria-expanded' => 'true',
@@ -236,7 +236,7 @@ class PHAB_Container_Widget extends Widget_Nested_Base
 ?>
                 <details <?php echo wp_kses_post($title_render_attributes); ?>>
                     <summary <?php echo wp_kses_post($summary_render_attributes); ?>>
-                        <span class='phab-item-title-header'><?php echo wp_kses_post("<div class=\"phab-accordion-item-title-text\"> $item_title </div>"); ?></span>
+                        <span class='phab-item-title-header'><?php echo wp_kses_post("<div class=\"phab-container-item-title-text\"> $item_title </div>"); ?></span>
                     </summary>
                     <?php echo $item_content; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped 
                     ?>
@@ -308,111 +308,74 @@ class PHAB_Container_Widget extends Widget_Nested_Base
     {
         return array_merge(parent::get_initial_config(), [
             'support_improved_repeaters' => true,
-            'target_container' => ['.phab-accordion'],
+            'target_container' => ['.phab-container'],
             'node' => 'details',
             'is_interlaced' => true,
         ]);
     }
 
-    protected function content_template_single_repeater_item()
-    {
-        ?>
-        <#
-            const elementUid=view.getIDInt().toString().substring( 0, 3 ) + view.collection.length;
-
-            const itemWrapperAttributes={ 'id' : 'phab-accordion-item-' + elementUid, 'class' : [ 'phab-accordion-item' , 'e-normal' ],
-            };
-
-            const itemTitleAttributes={ 'class' : [ 'phab-accordion-item-title' ], 'data-accordion-index' : view.collection.length + 1, 'tabindex' : -1, 'aria-expanded' : 'false' , 'aria-controls' : 'phab-accordion-item-' + elementUid,
-            };
-
-            const itemTitleTextAttributes={ 'class' : [ 'phab-accordion-item-title-text' ], 'data-binding-index' : view.collection.length + 1, 'data-binding-type' : 'repeater-item' , 'data-binding-repeater-name' : 'items' , 'data-binding-setting' : ['item_title', 'element_css_id' ], 'data-binding-config' : JSON.stringify({ 'element_css_id' : {
-            editType: 'attribute' ,
-            attr: 'id' ,
-            selector: 'details'
-            }, 'item_title' : {
-            editType: 'text'
-            }
-            }),
-            };
-
-            view.addRenderAttribute( 'details-container' , itemWrapperAttributes, null, true );
-            view.addRenderAttribute( 'summary-container' , itemTitleAttributes, null, true );
-            view.addRenderAttribute( 'text-container' , itemTitleTextAttributes, null, true );
-            #>
-
-            <details {{{ view.getRenderAttributeString( 'details-container' ) }}}>
-                <summary {{{ view.getRenderAttributeString( 'summary-container' ) }}}>
-                    <span class="phab-item-title-header">
-                        <div {{{ view.getRenderAttributeString( 'text-container' ) }}}>{{{ data.item_title }}}</div>
-                    </span>
-                </summary>
-            </details>
-        <?php
-    }
-
     protected function content_template()
     {
         ?>
-            <#
-                var flagKey=settings.flag_key || '' ;
-                #>
+        <#
+            var flagKey=settings.flag_key || '' ;
+            #>
 
-                <# if ( ! flagKey ) { #>
-                    <div style="padding:.75em 1em;background:#fff3cd;border-left:4px solid #ffc107;margin-bottom:8px;font-size:13px;">
-                        ⚠ Set a Feature Flag Key in the Experiment panel.
-                    </div>
-                    <# } #>
+            <# if ( ! flagKey ) { #>
+                <div style="padding:.75em 1em;background:#fff3cd;border-left:4px solid #ffc107;margin-bottom:8px;font-size:13px;">
+                    ⚠ Set a Feature Flag Key in the Experiment panel.
+                </div>
+                <# } #>
 
-                        <div class="phab-accordion" aria-label="Accordion. Open links with Enter or Space, close with Escape, and navigate with Arrow Keys">
-                            <# if ( settings['items'] ) {
-                                const elementUid=view.getIDInt().toString().substring( 0, 3 ),
-                                defaultState='expanded'
+                    <div class="phab-container" aria-label="Accordion. Open links with Enter or Space, close with Escape, and navigate with Arrow Keys">
+                        <# if ( settings['items'] ) {
+                            const elementUid=view.getIDInt().toString().substring( 0, 3 ),
+                            defaultState='expanded'
+                            #>
+
+                            <# _.each( settings['items'], function( item, index ) {
+                                const itemCount=index + 1,
+                                itemUid=elementUid + index,
+                                itemTitleTextKey='item-title-text-' + itemUid,
+                                itemWrapperKey=itemUid,
+                                itemTitleKey='item-' + itemUid,
+                                ariaExpanded='true' ;
+
+                                itemId='phab-container-item-' + itemUid;
+
+                                const itemWrapperAttributes={ 'id' : itemId, 'class' : [ 'phab-container-item' , 'e-normal' ],
+                                };
+
+                                itemWrapperAttributes['open']=true;
+
+                                view.addRenderAttribute( itemWrapperKey, itemWrapperAttributes );
+
+                                view.addRenderAttribute( itemTitleKey, { 'class' : ['phab-container-item-title'], 'data-accordion-index' : itemCount, 'tabindex' : 0===index ? 0 : -1, 'aria-expanded' : ariaExpanded, 'aria-controls' : itemId,
+                                });
+
+                                view.addRenderAttribute( itemTitleTextKey, { 'class' : ['phab-container-item-title-text'], 'data-binding-index' : itemCount, 'data-binding-type' : 'repeater-item' , 'data-binding-repeater-name' : 'items' , 'data-binding-setting' : ['item_title', 'element_css_id' ], 'data-binding-config' : JSON.stringify({ 'element_css_id' : {
+                                editType: 'attribute' ,
+                                attr: 'id' ,
+                                selector: 'details'
+                                }, 'item_title' : {
+                                editType: 'text'
+                                }
+                                }),
+                                });
                                 #>
 
-                                <# _.each( settings['items'], function( item, index ) {
-                                    const itemCount=index + 1,
-                                    itemUid=elementUid + index,
-                                    itemTitleTextKey='item-title-text-' + itemUid,
-                                    itemWrapperKey=itemUid,
-                                    itemTitleKey='item-' + itemUid,
-                                    ariaExpanded='true' ;
-
-                                    itemId='phab-accordion-item-' + itemUid;
-
-                                    const itemWrapperAttributes={ 'id' : itemId, 'class' : [ 'phab-accordion-item' , 'e-normal' ],
-                                    };
-
-                                    itemWrapperAttributes['open']=true;
-
-                                    view.addRenderAttribute( itemWrapperKey, itemWrapperAttributes );
-
-                                    view.addRenderAttribute( itemTitleKey, { 'class' : ['phab-accordion-item-title'], 'data-accordion-index' : itemCount, 'tabindex' : 0===index ? 0 : -1, 'aria-expanded' : ariaExpanded, 'aria-controls' : itemId,
-                                    });
-
-                                    view.addRenderAttribute( itemTitleTextKey, { 'class' : ['phab-accordion-item-title-text'], 'data-binding-index' : itemCount, 'data-binding-type' : 'repeater-item' , 'data-binding-repeater-name' : 'items' , 'data-binding-setting' : ['item_title', 'element_css_id' ], 'data-binding-config' : JSON.stringify({ 'element_css_id' : {
-                                    editType: 'attribute' ,
-                                    attr: 'id' ,
-                                    selector: 'details'
-                                    }, 'item_title' : {
-                                    editType: 'text'
-                                    }
-                                    }),
-                                    });
-                                    #>
-
-                                    <details {{{ view.getRenderAttributeString( itemWrapperKey ) }}}>
-                                        <summary {{{ view.getRenderAttributeString( itemTitleKey ) }}}>
-                                            <span class="phab-item-title-header">
-                                                <div {{{ view.getRenderAttributeString( itemTitleTextKey ) }}}>
-                                                    {{{ item.item_title }}}
-                                                </div>
-                                            </span>
-                                        </summary>
-                                    </details>
-                                    <# } ); #>
-                                        <# } #>
-                        </div>
-                <?php
-            }
+                                <details {{{ view.getRenderAttributeString( itemWrapperKey ) }}}>
+                                    <summary {{{ view.getRenderAttributeString( itemTitleKey ) }}}>
+                                        <span class="phab-item-title-header">
+                                            <div {{{ view.getRenderAttributeString( itemTitleTextKey ) }}}>
+                                                {{{ index === 0 ? 'A: ' : 'B: ' }}} {{{ item.item_title }}}
+                                            </div>
+                                        </span>
+                                    </summary>
+                                </details>
+                                <# } ); #>
+                                    <# } #>
+                    </div>
+            <?php
         }
+    }

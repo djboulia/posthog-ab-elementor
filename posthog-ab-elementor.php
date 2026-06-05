@@ -76,12 +76,6 @@ function phab_register_category($elements_manager)
 
 function phab_register_widgets($widgets_manager)
 {
-	require_once PHAB_DIR . 'widgets/class-ab-section-widget.php';
-	$widgets_manager->register(new \PHAB_AB_Section_Widget());
-
-	require_once PHAB_DIR . 'widgets/class-accordion-widget.php';
-	$widgets_manager->register(new \PHAB_Accordion_Widget());
-
 	require_once PHAB_DIR . 'widgets/phab-container.php';
 	$widgets_manager->register(new \PHAB_Container_Widget());
 }
