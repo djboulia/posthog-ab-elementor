@@ -189,9 +189,6 @@ class PHAB_Container_Widget extends Widget_Nested_Base
         $is_editor        = \Elementor\Plugin::$instance->editor->is_edit_mode();
         $variant_key     = sanitize_key($settings['items'][1]['item_title'] ?? 'test'); // we use the first variant's name as the variant key for the frontend
 
-        // ── Control slot ──────────────────────────────────────────────────────
-        $control_style = '';
-
         if ($is_editor) {
             // ── Validation notice (editor only) ──────────────────────────────────
             if (! $flag_key) {
@@ -252,26 +249,25 @@ class PHAB_Container_Widget extends Widget_Nested_Base
             </div>
         <?php
         } else {
-            // on the frontend, we just render the A and B children wrapped with attributes so that the
-            // JS running on the page can show/hide the right experiment
+            // on the frontend, we just render the A and B children wrapped with attributes 
+            // (initially hidden) so that the JS running on the page can show/hide the right experiment
+
+            $style = 'visibility:hidden; height:0; overflow:hidden;';
 
             // ── Control slot ──────────────────────────────────────────────────────
             printf(
                 '<div data-phab-flag="%1$s" data-phab-variant="control" class="phab-ab-container phab-control" style="%2$s">',
                 esc_attr($flag_key),
-                esc_attr($control_style)
+                esc_attr($style)
             );
             $this->print_child(0);
             echo '</div>';
-
-            // ── Variant slot ──────────────────────────────────────────────────────
-            $variant_style = '';
 
             printf(
                 '<div data-phab-flag="%1$s" data-phab-variant="%2$s" class="phab-ab-container phab-variant" style="%3$s">',
                 esc_attr($flag_key),
                 esc_attr($variant_key),
-                esc_attr($variant_style)
+                esc_attr($style)
             );
             $this->print_child(1);
             echo '</div>';
