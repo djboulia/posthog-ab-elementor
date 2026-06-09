@@ -68,20 +68,6 @@ class Settings
 
 		add_settings_field('api_key', __('Project API Key', 'posthog-ab'), [$this, 'field_api_key'], self::SLUG, 'phab_connection');
 		add_settings_field('host',    __('PostHog Host', 'posthog-ab'),    [$this, 'field_host'],    self::SLUG, 'phab_connection');
-
-		// ── Experiments ───────────────────────────────────────────────────────
-		add_settings_section(
-			'phab_experiments',
-			__('Registered Experiments', 'posthog-ab'),
-			function () {
-				echo '<p>' .
-					esc_html__('Document your experiments here for reference. This list does not affect live behaviour — actual routing is controlled by your PostHog feature flags.', 'posthog-ab') .
-					'</p>';
-			},
-			self::SLUG
-		);
-
-		add_settings_field('experiments', '', [$this, 'field_experiments'], self::SLUG, 'phab_experiments');
 	}
 
 	public function sanitize($input)
@@ -126,76 +112,7 @@ class Settings
 		$settings = get_option(PHAB_OPTION_KEY, []);
 		$value    = $settings['host'] ?? 'https://app.posthog.com';
 		echo '<input type="url" name="' . esc_attr(PHAB_OPTION_KEY) . '[host]" value="' . esc_attr($value) . '" class="regular-text">';
-		echo '<p class="description">' . esc_html__('Use https://eu.posthog.com for EU Cloud, or your self-hosted URL.', 'posthog-ab') . '</p>';
-	}
-
-	public function field_experiments()
-	{
-		$settings    = get_option(PHAB_OPTION_KEY, []);
-		$experiments = $settings['experiments'] ?? [];
-		$statuses    = [
-			'active'    => __('Active', 'posthog-ab'),
-			'paused'    => __('Paused', 'posthog-ab'),
-			'completed' => __('Completed', 'posthog-ab'),
-		];
-?>
-		<table class="widefat striped" id="phab-experiments-table" style="max-width:700px;">
-			<thead>
-				<tr>
-					<th><?php esc_html_e('Feature Flag Key', 'posthog-ab'); ?></th>
-					<th><?php esc_html_e('Description', 'posthog-ab'); ?></th>
-					<th><?php esc_html_e('Status', 'posthog-ab'); ?></th>
-					<th></th>
-				</tr>
-			</thead>
-			<tbody id="phab-experiments-rows">
-				<?php foreach ($experiments as $i => $exp) : ?>
-					<tr>
-						<td><input type="text" name="<?php echo esc_attr(PHAB_OPTION_KEY); ?>[experiments][<?php echo (int) $i; ?>][flag_key]" value="<?php echo esc_attr($exp['flag_key']); ?>" class="regular-text" placeholder="my-flag"></td>
-						<td><input type="text" name="<?php echo esc_attr(PHAB_OPTION_KEY); ?>[experiments][<?php echo (int) $i; ?>][description]" value="<?php echo esc_attr($exp['description']); ?>" class="regular-text"></td>
-						<td>
-							<select name="<?php echo esc_attr(PHAB_OPTION_KEY); ?>[experiments][<?php echo (int) $i; ?>][status]">
-								<?php foreach ($statuses as $val => $label) : ?>
-									<option value="<?php echo esc_attr($val); ?>" <?php selected($exp['status'], $val); ?>><?php echo esc_html($label); ?></option>
-								<?php endforeach; ?>
-							</select>
-						</td>
-						<td><button type="button" class="button phab-remove-row"><?php esc_html_e('Remove', 'posthog-ab'); ?></button></td>
-					</tr>
-				<?php endforeach; ?>
-			</tbody>
-		</table>
-		<p>
-			<button type="button" class="button" id="phab-add-experiment"><?php esc_html_e('+ Add Experiment', 'posthog-ab'); ?></button>
-		</p>
-		<script>
-			(function() {
-				var tbody = document.getElementById('phab-experiments-rows');
-				var key = <?php echo wp_json_encode(PHAB_OPTION_KEY); ?>;
-
-				document.getElementById('phab-add-experiment').addEventListener('click', function() {
-					var idx = tbody.rows.length;
-					var tr = document.createElement('tr');
-					tr.innerHTML =
-						'<td><input type="text" name="' + key + '[experiments][' + idx + '][flag_key]" class="regular-text" placeholder="my-flag"></td>' +
-						'<td><input type="text" name="' + key + '[experiments][' + idx + '][description]" class="regular-text"></td>' +
-						'<td><select name="' + key + '[experiments][' + idx + '][status]">' +
-						'<option value="active">Active</option>' +
-						'<option value="paused">Paused</option>' +
-						'<option value="completed">Completed</option>' +
-						'</select></td>' +
-						'<td><button type="button" class="button phab-remove-row">Remove</button></td>';
-					tbody.appendChild(tr);
-				});
-
-				tbody.addEventListener('click', function(e) {
-					if (e.target.classList.contains('phab-remove-row')) {
-						e.target.closest('tr').remove();
-					}
-				});
-			})();
-		</script>
-	<?php
+		echo '<p class="description">' . esc_html__('Use https://us.i.posthog.com for US Cloud, or your self-hosted URL.', 'posthog-ab') . '</p>';
 	}
 
 	// -------------------------------------------------------------------------
@@ -313,7 +230,7 @@ class Settings
 	private function render_ab_widgets_table(): void
 	{
 		$rows = $this->get_ab_widget_instances();
-	?>
+?>
 		<h2><?php esc_html_e('Active Widget A/B Tests', 'posthog-ab'); ?></h2>
 		<p><?php esc_html_e('Every A/B widget instance found across all Elementor-built pages and posts.', 'posthog-ab'); ?></p>
 		<?php if (empty($rows)) : ?>
