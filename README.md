@@ -15,7 +15,7 @@ Run PostHog feature-flag–driven A/B tests on Elementor widgets, sections, and 
 ## Installation
 
 1. Copy the `posthog-ab-elementor/` folder into `wp-content/plugins/`.
-2. Activate **PostHog A/B Testing for Elementor** in *Plugins → Installed Plugins*.
+2. Activate **PostHog A/B Testing for Elementor** in _Plugins → Installed Plugins_.
 3. Go to **Settings → PostHog A/B** and enter your PostHog **Project API Key** and **Host URL**.
 4. Save. PostHog is now initialised on every front-end page.
 
@@ -25,11 +25,11 @@ Run PostHog feature-flag–driven A/B tests on Elementor widgets, sections, and 
 
 ### Settings → PostHog A/B
 
-| Field | Description |
-|-------|-------------|
-| **Project API Key** | Your PostHog public key (starts with `phc_`). Found in PostHog → Project Settings → Project API Key. |
-| **PostHog Host** | `https://app.posthog.com` (US Cloud), `https://eu.posthog.com` (EU Cloud), or your self-hosted URL. |
-| **Registered Experiments** | Optional reference list. Doesn't affect live behaviour — purely for documentation. |
+| Field                      | Description                                                                                          |
+| -------------------------- | ---------------------------------------------------------------------------------------------------- |
+| **Project API Key**        | Your PostHog public key (starts with `phc_`). Found in PostHog → Project Settings → Project API Key. |
+| **PostHog Host**           | `https://us.i.posthog.com` (US Cloud), or your self-hosted URL.                                      |
+| **Registered Experiments** | Optional reference list. Doesn't affect live behaviour — purely for documentation.                   |
 
 ---
 
@@ -37,14 +37,14 @@ Run PostHog feature-flag–driven A/B tests on Elementor widgets, sections, and 
 
 Use this when you want to swap out a section or widget on a page.
 
-1. In the Elementor editor, search for **A/B Section** in the widget panel (under the *PostHog A/B* category).
+1. In the Elementor editor, search for **A/B Section** in the widget panel (under the _PostHog A/B_ category).
 2. Drag it onto your canvas.
 3. In the **Experiment** tab:
    - **Feature Flag Key** — the exact key from PostHog (e.g. `homepage-hero-test`).
    - **Variant Key** — the value PostHog returns for the B group (default: `test`). Must match the variant key in your PostHog flag definition.
    - **Preview in Editor** — choose to preview Control, Variant, or both stacked.
-4. Build your **Control (A)** content in the *Control Content* tab.
-5. Build your **Variant (B)** content in the *Variant Content* tab.
+4. Build your **Control (A)** content in the _Control Content_ tab.
+5. Build your **Variant (B)** content in the _Variant Content_ tab.
 6. Publish/update the page.
 
 ### How it works
