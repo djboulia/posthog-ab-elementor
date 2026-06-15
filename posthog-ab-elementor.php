@@ -5,8 +5,8 @@
  * Plugin URI:  https://github.com/your-org/posthog-ab-elementor
  * Description: Run PostHog feature-flag–driven A/B tests on Elementor widgets, sections, and pages.
  * Version:     1.0.0
- * Author:      Charity Navigator
- * License:     GPL-2.0+
+ * Author:      djboulia@gmail.com
+ * License:     MIT
  * Text Domain: posthog-ab
  */
 
