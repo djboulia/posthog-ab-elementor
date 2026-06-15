@@ -2,7 +2,7 @@
 
 /**
  * Plugin Name: PostHog A/B Testing for Elementor
- * Plugin URI:  https://github.com/your-org/posthog-ab-elementor
+ * Plugin URI:  https://github.com/djboulia/posthog-ab-elementor
  * Description: Run PostHog feature-flag–driven A/B tests on Elementor widgets, sections, and pages.
  * Version:     1.0.0
  * Author:      djboulia@gmail.com
